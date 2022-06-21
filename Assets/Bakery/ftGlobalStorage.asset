@@ -401,7 +401,41 @@ MonoBehaviour:
   - Assets/Bakery/examples/content/sponza/bush.FBX
   - Assets/Bakery/examples/content/floor_lamp.FBX
   - Assets/_Island/Models/Character_00.fbx
-  uvOverlapAssetList: 00000000ffffffff01010000
+  - Assets/Character Movement Fundamentals/Source/Capguy/Animations/Land.fbx
+  - Assets/Character Movement Fundamentals/Source/Capguy/Animations/Fall.fbx
+  - Assets/Character Movement Fundamentals/Source/Capguy/Animations/IdleLooking.fbx
+  - Assets/Character Movement Fundamentals/Source/Capguy/Animations/Idle.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Quadsphere.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Ramp_4x2x2.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Tile_8x8x2.fbx
+  - Assets/Character Movement Fundamentals/Source/Capguy/Animations/WalkForward.fbx
+  - Assets/Character Movement Fundamentals/Source/Capguy/Animations/WalkRight.fbx
+  - Assets/Character Movement Fundamentals/Source/Capguy/Model/Capguy.fbx
+  - Assets/Character Movement Fundamentals/Source/Capguy/Animations/Jump.fbx
+  - Assets/Character Movement Fundamentals/Source/Capguy/Animations/WalkLeft.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Tile_4x4x1.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Stair_8x4x2.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Stair_8x4x1.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Stair_8x4x4.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/WaveTile_20x4.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Terrain_24x24.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/ArrowMarker.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Stair_4x4x2.fbx
+  - Assets/Character Movement Fundamentals/Source/Capguy/Animations/Capguy.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Cube_4x4x2.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Ramp_8x4x4.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Mesh_Terrain.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Cube_4x4x4.fbx
+  - Assets/Character Movement Fundamentals/Source/Capguy/Animations/WalkBackward.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Stair_8x4x2_Small.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Cube_2x2x2.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Ramp_4x4x1.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Tile_16x16x2.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Tunnel_18x18.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Platform_4x4.fbx
+  - Assets/Character Movement Fundamentals/Source/Capguy/Animations/WalkNeutral.fbx
+  - Assets/Character Movement Fundamentals/Source/Environment/Meshes/Tunnel_28x28.fbx
+  uvOverlapAssetList: 00000000ffffffff0101000000000000000000000000000000000000010100000101000001010000000000000000000000000000000000000000000001010000010100000101000001010000010100000000000000000000010100000000000001010000010100000000000000000000000000000101000001010000010100000000000001010000010100000000000001010000
   xatlasWarningShown: 0
   foundCompatibleSetup: 0
   gpuName: 
