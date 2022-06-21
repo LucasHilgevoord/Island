@@ -5,6 +5,15 @@ using UnityEngine;
 
 public class CameraHandler : MonoBehaviour
 {
+    private enum CameraPresets
+    {
+        Custom = 0,
+        TopDown = 1,
+        ThirdPerson = 2,
+        FirstPerson = 3,
+        SideScroller = 4
+    }
+
     [SerializeField] private Vector3 _forward;
 
     [SerializeField] private float _offset;
@@ -16,14 +25,82 @@ public class CameraHandler : MonoBehaviour
     private Vector3 _targetPos; // NOT FINISHED
     [SerializeField] private Vector3 _targetOffset;
 
+    [Header("Settings")]
+    [SerializeField] private bool _enableMouseRot;
+    [SerializeField] private float _mouseSensitivity = 200;
+    [SerializeField] private bool _enableScrollZoom;
+    [SerializeField] private float _mouseScrollSensitivity = 0.1f;
+    [SerializeField] private float _minScroll, _maxScroll;
+    [SerializeField] private bool _flipMouseInput;
+
+    [SerializeField] private CameraPresets _preset;
+
+    private void Start()
+    {
+        switch (_preset)
+        {
+            case CameraPresets.Custom:
+                break;
+            case CameraPresets.TopDown:
+                break;
+            case CameraPresets.ThirdPerson:
+                break;
+            case CameraPresets.FirstPerson:
+                break;
+            case CameraPresets.SideScroller:
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void SetRotation()
+    {
+        
+    }
+
     private void Update()
     {
         UpdateOffset();
         UpdateRotation();
+
+        if (_enableMouseRot)
+        {
+            if (Input.GetMouseButton(1))
+                UpdateMousePosition();
+            
+            if (_enableScrollZoom)
+            {
+                float scroll = -Input.mouseScrollDelta.y * _mouseScrollSensitivity;
+                float newOffset = _offset + scroll;
+                if (newOffset < _minScroll)
+                {
+                    newOffset = _minScroll;
+                }
+                else if (newOffset > _maxScroll)
+                {
+                    newOffset = _maxScroll;
+                }
+
+                _offset = newOffset;
+            }
+        }
+            
+    }
+
+    private void UpdateMousePosition()
+    {
+        int flip = _flipMouseInput ? -1 : 1;
+
+        _horizontalRot += Input.GetAxis("Mouse X") * Time.deltaTime * _mouseSensitivity * flip;
+        _verticalRot += Input.GetAxis("Mouse Y") * Time.deltaTime * _mouseSensitivity * flip;
     }
 
     internal void UpdateOffset()
     {
+        _horizontalRot = CapRotation(_horizontalRot);
+        _verticalRot = CapRotation(_verticalRot);        
+
         Vector3 offset = _forward * _offset;
         transform.position = RotateAroundTarget(offset) + _target.position + _targetOffset;
     }
@@ -58,11 +135,11 @@ public class CameraHandler : MonoBehaviour
 
     private void OnValidate()
     {
-        _horizontalRot = CapRotation(_horizontalRot);
-        _verticalRot = CapRotation(_verticalRot);
-
-        UpdateOffset();
-        UpdateRotation();
+        if (Application.isEditor)
+        {
+            UpdateOffset();
+            UpdateRotation();
+        }
     }
 
     private float CapRotation(float rot)
