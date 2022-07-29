@@ -10,8 +10,8 @@ public class CameraHandler : MonoBehaviour
         Custom = 0,
         TopDown = 1,
         ThirdPerson = 2,
-        FirstPerson = 3,
-        SideScroller = 4
+        SideScroller = 3,
+        //FirstPerson = 4 // NOT YET IMPLEMENTED
     }
 
     [SerializeField] private Vector3 _forward;
@@ -27,36 +27,33 @@ public class CameraHandler : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] private bool _enableMouseRot;
+    [SerializeField] private bool _holdMouseToRotate;
+    [SerializeField] private bool _hideCursor;
     [SerializeField] private float _mouseSensitivity = 200;
-    [SerializeField] private bool _enableScrollZoom;
+    [SerializeField] private bool _enableScrollZoom = true;
     [SerializeField] private float _mouseScrollSensitivity = 0.1f;
     [SerializeField] private float _minScroll, _maxScroll;
     [SerializeField] private bool _flipMouseInput;
 
     [SerializeField] private CameraPresets _preset;
-
-    private void Start()
+    private Vector2[] _presetValues
     {
-        switch (_preset)
+        get
         {
-            case CameraPresets.Custom:
-                break;
-            case CameraPresets.TopDown:
-                break;
-            case CameraPresets.ThirdPerson:
-                break;
-            case CameraPresets.FirstPerson:
-                break;
-            case CameraPresets.SideScroller:
-                break;
-            default:
-                break;
+            return new Vector2[]
+            {
+                new Vector2(0, 0), // Custom
+                new Vector2(180, 270), // Top Down
+                new Vector2(180, 340), // Third Person
+                new Vector2(90, 360),  // Side Scroller
+                new Vector2(0, 0) // First Person
+            };
         }
     }
 
-    private void SetRotation()
+    private void Start()
     {
-        
+        SetPreset();
     }
 
     private void Update()
@@ -66,7 +63,7 @@ public class CameraHandler : MonoBehaviour
 
         if (_enableMouseRot)
         {
-            if (Input.GetMouseButton(1))
+            if (Input.GetMouseButton(1) || !_holdMouseToRotate)
                 UpdateMousePosition();
             
             if (_enableScrollZoom)
@@ -85,7 +82,15 @@ public class CameraHandler : MonoBehaviour
                 _offset = newOffset;
             }
         }
-            
+    }
+
+    private void SetPreset()
+    {
+        if (_preset != CameraPresets.Custom)
+        {
+            _horizontalRot = _presetValues[(int)_preset].x;
+            _verticalRot = _presetValues[(int)_preset].y;
+        }
     }
 
     private void UpdateMousePosition()
@@ -137,8 +142,17 @@ public class CameraHandler : MonoBehaviour
     {
         if (Application.isEditor)
         {
+            SetPreset();
             UpdateOffset();
             UpdateRotation();
+
+            if (_enableScrollZoom)
+            {
+                if (_offset < _minScroll)
+                    _offset = _minScroll;
+                else if (_offset > _maxScroll)
+                    _offset = _maxScroll;
+            }
         }
     }
 
@@ -159,5 +173,11 @@ public class CameraHandler : MonoBehaviour
         _targetPos = _target == null ? Vector3.zero : _target.position;
         GizmosUtils.DrawHorizontalCircle(_targetPos + _targetOffset, _offset, Color.red);
         GizmosUtils.DrawVerticalCircle(_targetPos + _targetOffset, _offset, Color.blue);
+    }
+
+    private void OnApplicationFocus(bool focus)
+    {
+        if (_hideCursor)
+            Cursor.visible = !focus;
     }
 }
