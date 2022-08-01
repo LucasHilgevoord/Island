@@ -61,6 +61,7 @@ public class ActorController : MonoBehaviour
     {
         // TESTING
         _movementState = MovementState.Walking;
+        _controllerState = ControllerState.Grounded;
     }
 
     private void AssignActor(Actor ac) { _actor = ac; }
@@ -87,7 +88,8 @@ public class ActorController : MonoBehaviour
 
         // Apply acceleration if there is 
         _acceleration = CalculateAcceleration(_direction);
-        _newVelocity = _actor.transform.forward * _acceleration;
+
+        _newVelocity = CalculateVelocity();
 
         // Calculate the momentum
         _momentum = CalculateMomentum();
@@ -95,6 +97,23 @@ public class ActorController : MonoBehaviour
         // Set the velocity of the assigned actor
         _actor.SetVelocity(_newVelocity);
         _actor.SetRotation(_rotation);
+    }
+
+    private Vector3 CalculateVelocity()
+    {
+        Vector3 velocity = Vector3.zero;
+        
+        // Apply forward motion
+        velocity += _actor.transform.forward * _acceleration;
+
+        // Apply gravity
+        if (_controllerState != ControllerState.Grounded)
+            velocity -= _actor.transform.up * _gravityForce * Time.deltaTime;
+
+        if (velocity.magnitude > 1f)
+            velocity.Normalize();
+        
+        return velocity;
     }
 
     private Vector3 GetDirection()
@@ -105,26 +124,20 @@ public class ActorController : MonoBehaviour
         // Check if we want to move based on the camera it's direction
         if (_useCameraDirection)
         {
-
+            // TODO: Implement
+            throw new NotImplementedException();
         } else
         {
             dir += transform.right * Input.GetAxisRaw("Horizontal");
             dir += transform.forward * Input.GetAxisRaw("Vertical");
         }
 
-        //if (_velocity.magnitude > 1f)
-        //    _velocity.Normalize();
-
-        // Add the movement speed
-        //velocity *= GetMovementSpeed();
         return dir;
     }
 
     private Vector3 CalculateRotation(Vector3 dir)
     {
-        if (dir.x == 0) return Vector3.zero;
-        Debug.Log(dir);
-
+        if (dir.x == 0 || dir.z == 0) return Vector3.zero;
         Vector3 rot = _actor.transform.up * (_turningSpeed * Time.deltaTime) * dir.x;
         return rot;
     }
@@ -153,6 +166,8 @@ public class ActorController : MonoBehaviour
 
     private float CalculateAcceleration(Vector3 dir)
     {
+        if (_acceleration == 0 && dir.z == 0) return 0;
+
         if (dir.z > 0)
         {
             // Increase acceleration

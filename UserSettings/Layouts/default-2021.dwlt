@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 997
   m_ShowMode: 4
-  m_Title: Project
+  m_Title: Hierarchy
   m_RootView: {fileID: 11}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -98,7 +98,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 200}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 35
+  controlID: 62
 --- !u!114 &5
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -179,7 +179,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 128
+  controlID: 29
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -261,7 +261,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 200}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 29
+  controlID: 174
 --- !u!114 &11
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -2197,22 +2197,22 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/_Island/Scripts/Camera
+    - Assets/_Island/Scripts/Entities
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/_Island/Scripts/Camera
+  - Assets/_Island/Scripts/Entities
   m_LastFoldersGridSize: -1
-  m_LastProjectPath: D:\Documenten\Git\Personal\Unity\Island
+  m_LastProjectPath: E:\GitE\Island
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 8c6c0000
-    m_LastClickedID: 27788
-    m_ExpandedIDs: 00000000ec6a0000ee6a0000f06a0000f26a0000f46a0000f66a0000f86a0000fa6a0000fc6a00006e6c0000786c000000ca9a3b
+    m_SelectedIDs: 0e940000
+    m_LastClickedID: 37902
+    m_ExpandedIDs: 000000006e6b0000706b0000726b0000746b0000766b0000786b00007a6b00007c6b00007e6b00000c6d000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -2240,7 +2240,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000ec6a0000ee6a0000f06a0000f26a0000f46a0000f66a0000f86a0000fa6a0000fc6a0000
+    m_ExpandedIDs: 000000006e6b0000706b0000726b0000746b0000766b0000786b00007a6b00007c6b00007e6b0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -4032,9 +4032,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 3.6650617, y: 0.8426683, z: 2.170374}
+    m_Target: {x: -15.626396, y: -9.203053, z: -0.3195887}
     speed: 2
-    m_Value: {x: 3.6650617, y: 0.8426683, z: 2.170374}
+    m_Value: {x: -15.626396, y: -9.203053, z: -0.3195887}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -4081,9 +4081,9 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.19902253, y: -0.32915604, z: 0.07122005, w: -0.92025465}
+    m_Target: {x: -0.17359704, y: 0.6915423, z: -0.17693456, w: -0.6783905}
     speed: 2
-    m_Value: {x: -0.19903302, y: -0.3291734, z: 0.0712238, w: -0.92030317}
+    m_Value: {x: -0.1736069, y: 0.69158167, z: -0.17694461, w: -0.67842907}
   m_Size:
     m_Target: 14.713741
     speed: 2
@@ -4146,7 +4146,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 80fafaff624ffdff36fbfffff0680000086900003e690000
+      m_ExpandedIDs: 36fbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
