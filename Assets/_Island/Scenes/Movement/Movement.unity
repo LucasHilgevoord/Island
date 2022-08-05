@@ -827,6 +827,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _rigidbody: {fileID: 414155296}
   _collider: {fileID: 414155297}
+  _walkingSpeed: 2
+  _runningSpeed: 4
+  _crouchingSpeed: 0.8
+  _turningSpeed: 200
+  _accelerationTime: 0.4
+  _decelerationTime: 0.3
+  _breakTime: 1
 --- !u!114 &414155299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -839,8 +846,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b63a35b4dd9937546b18843a02b9508e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _actor: {fileID: 0}
-  _animator: {fileID: 0}
+  _actor: {fileID: 414155298}
+  _animator: {fileID: 574882183}
 --- !u!1 &421584459
 GameObject:
   m_ObjectHideFlags: 0
@@ -2641,13 +2648,6 @@ MonoBehaviour:
   _useCameraDirection: 0
   _camera: {fileID: 330585545}
   _actor: {fileID: 414155298}
-  _walkingSpeed: 5
-  _runningSpeed: 1
-  _crouchingSpeed: 1
-  _turningSpeed: 200
-  _accelerationTime: 0.5
-  _decelerationTime: 0.3
-  _breakTime: 0.1
 --- !u!1 &1948704654
 GameObject:
   m_ObjectHideFlags: 0

@@ -26,6 +26,7 @@ public class ActorController : MonoBehaviour
 {
     [Header("Global Options :")]
     [SerializeField] private bool _lockInput;
+    [SerializeField] private bool _turnInPlace; // NOT CORRECTLY IMPLEMENTED YET!
     
     [Header("External Forces: ")]
     [SerializeField] private float _gravityForce;
@@ -37,25 +38,19 @@ public class ActorController : MonoBehaviour
     private MovementState _movementState;
     private Vector3 _newVelocity, _currentVelocity;
     private Vector3 _direction;
-    private Vector3 _rotation;
+    private Quaternion _rotation;
     private Vector3 _momentum;
     private float _acceleration;
+    
+    private bool _isBreaking;
+    private bool _isTurning;
 
-    [Header("Camera Options :")]
+    [Header("Camera Variables :")]
     [SerializeField] private bool _useCameraDirection;
     [SerializeField] private Camera _camera;
 
-    [Header("Actor Options :")]
+    [Header("Actor Variables :")]
     [SerializeField] private Actor _actor;
-    [SerializeField] private float _walkingSpeed = 1;
-    [SerializeField] private float _runningSpeed = 1;
-    [SerializeField] private float _crouchingSpeed = 1;
-    [SerializeField] private float _turningSpeed = 1;
-    
-    /// How higher the number, how longer it takes
-    [SerializeField] private float _accelerationTime = 1;
-    [SerializeField] private float _decelerationTime = 1;
-    [SerializeField] private float _breakTime = 1;
 
     private void Start()
     {
@@ -70,6 +65,23 @@ public class ActorController : MonoBehaviour
     {
         // Update the controller
         UpdateController();
+        CheckInput();
+    }
+
+    private void CheckInput()
+    {
+        // JUST FOR TESTING
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            _movementState = MovementState.Sprinting;
+        }
+        else if (Input.GetKey(KeyCode.LeftControl))
+        {
+            _movementState = MovementState.Crouching;
+        } else
+        {
+            _movementState = MovementState.Walking;
+        }
     }
 
     private void UpdateController()
@@ -83,26 +95,72 @@ public class ActorController : MonoBehaviour
         // Get the horizontal and vertical velocity
         _direction = GetDirection();
 
-        // Calculate the rotation we are supposed to get
-        _rotation = CalculateRotation(_direction);
-
         // Apply acceleration if there is 
         _acceleration = CalculateAcceleration(_direction);
 
+        // Calculate the new velocity we are supposed to get
         _newVelocity = CalculateVelocity();
 
+        // Calculate the rotation we are supposed to get
+        _rotation = CalculateRotation(_direction);
+
         // Calculate the momentum
-        _momentum = CalculateMomentum();
+        //_momentum = CalculateMomentum();
 
         // Set the velocity of the assigned actor
         _actor.SetVelocity(_newVelocity);
         _actor.SetRotation(_rotation);
     }
 
+    private Vector3 GetDirection()
+    {
+        Vector3 dir = Vector3.zero;
+
+        // Check if we want to move based on the camera it's direction
+        if (_useCameraDirection)
+        {
+            throw new NotImplementedException();
+        }
+        else
+        {
+            // TODO: Create a input system
+            dir += transform.right * Input.GetAxisRaw("Horizontal");
+            dir += transform.forward * Input.GetAxisRaw("Vertical");
+        }
+
+        // Enable the break if we go to the oppposite direction
+        if (!_isBreaking && !_isTurning && _currentVelocity != Vector3.zero && Vector3.Dot(_currentVelocity.normalized, dir) <= -0.99f)
+        {
+            //Debug.Log("break: " + Vector3.Dot(_currentVelocity, dir));
+            _isBreaking = true;
+        }
+        else if (_isBreaking && _newVelocity.magnitude <= 0)
+        {
+            // Disable the break if we have come to a normalizedstop
+            _isBreaking = false;
+            _isTurning = true;
+        }
+
+        if (_isTurning)
+        {
+            Debug.Log(Vector3.Dot(_currentVelocity.normalized, dir));
+        }
+
+        // Make sure we don't enable the breaking again if we are turning
+        if (_isTurning && (Vector3.Dot(_currentVelocity.normalized, dir) >= 0.99f))
+            _isTurning = false;
+
+        return dir;
+    }
+
+
     private Vector3 CalculateVelocity()
     {
         Vector3 velocity = Vector3.zero;
-        
+
+        if (_turnInPlace && _isTurning)
+            return velocity;
+
         // Apply forward motion
         velocity += _actor.transform.forward * _acceleration;
 
@@ -113,33 +171,52 @@ public class ActorController : MonoBehaviour
         if (velocity.magnitude > 1f)
             velocity.Normalize();
         
+        velocity *= GetMaxSpeed();
         return velocity;
     }
 
-    private Vector3 GetDirection()
+    private Quaternion CalculateRotation(Vector3 dir)
     {
-        Vector3 dir = Vector3.zero;
-        // TODO: Create a input system
-
-        // Check if we want to move based on the camera it's direction
-        if (_useCameraDirection)
-        {
-            // TODO: Implement
-            throw new NotImplementedException();
-        } else
-        {
-            dir += transform.right * Input.GetAxisRaw("Horizontal");
-            dir += transform.forward * Input.GetAxisRaw("Vertical");
-        }
-
-        return dir;
+        dir.y = 0;
+        if (dir == Vector3.zero || _isBreaking) return _actor.transform.rotation;
+        Quaternion rot = Quaternion.LookRotation(dir, Vector3.up);
+        return rot;
     }
 
-    private Vector3 CalculateRotation(Vector3 dir)
+    private float CalculateAcceleration(Vector3 dir)
     {
-        if (dir.x == 0 || dir.z == 0) return Vector3.zero;
-        Vector3 rot = _actor.transform.up * (_turningSpeed * Time.deltaTime) * dir.x;
-        return rot;
+        dir.y = 0;
+        if (_acceleration == 0 && dir == Vector3.zero) return 0;
+        float maxSpeed = GetMaxSpeed();
+        
+        if (_isBreaking)
+        {
+            // Break 
+            _acceleration -= (maxSpeed / _actor.BreakTime) * Time.deltaTime;
+            _acceleration = Mathf.Max(_acceleration, 0);
+        } else if (dir.magnitude > 0)
+        {
+            // Increase acceleration
+            if (_acceleration > maxSpeed)
+            {
+                // Decrease the acceleration first before snapping the value to the max
+                _acceleration -= (maxSpeed / _actor.DecelerationTime) * Time.deltaTime;
+            } else
+            {
+                // Hold the acceleration at the max speed
+                _acceleration += (maxSpeed / _actor.AccelerationTime) * Time.deltaTime;
+                _acceleration = Mathf.Min(_acceleration, maxSpeed);
+            }
+        }
+        else if (dir.magnitude == 0)
+        {
+            // Decrease over time
+            _acceleration -= (maxSpeed / _actor.DecelerationTime) * Time.deltaTime;
+            _acceleration = Mathf.Max(_acceleration, 0);
+        }
+        
+
+        return _acceleration;
     }
 
     private Vector3 CalculateMomentum()
@@ -157,37 +234,11 @@ public class ActorController : MonoBehaviour
         Vector3 drag = Vector3.zero;
         return drag;
     }
-    
+
     private Vector3 CalculateFriction()
     {
         Vector3 drag = Vector3.zero;
         return drag;
-    }
-
-    private float CalculateAcceleration(Vector3 dir)
-    {
-        if (_acceleration == 0 && dir.z == 0) return 0;
-
-        if (dir.z > 0)
-        {
-            // Increase acceleration
-            _acceleration += (GetMaxSpeed() / _accelerationTime) * Time.deltaTime;
-            _acceleration = Mathf.Min(_acceleration, GetMaxSpeed());
-        }
-        else if (dir.z == 0)
-        {
-            // Decrease over time
-            _acceleration -= (GetMaxSpeed() / _decelerationTime) * Time.deltaTime;
-            _acceleration = Mathf.Max(_acceleration, 0);
-        }
-        else
-        {
-            // Break
-            _acceleration -= (GetMaxSpeed() / _breakTime) * Time.deltaTime;
-            _acceleration = Mathf.Max(_acceleration, 0);
-        }
-
-        return _acceleration;
     }
 
     protected bool IsGrounded()
@@ -203,11 +254,11 @@ public class ActorController : MonoBehaviour
             case MovementState.Idle:
                 return 0;
             case MovementState.Walking:
-                return _walkingSpeed;
+                return _actor.WalkingSpeed;
             case MovementState.Sprinting:
-                return _runningSpeed;
+                return _actor.RunningSpeed;
             case MovementState.Crouching:
-                return _crouchingSpeed;
+                return _actor.CrouchingSpeed;
         }
     }
 }
