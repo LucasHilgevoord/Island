@@ -54,9 +54,18 @@ public class Actor : MonoBehaviour
         _rigidbody.velocity = velocity; 
     }
 
+    /// <summary>
+    /// Method to set the rotation of this Actor
+    /// </summary>
+    /// <param name="rotation">New Rotation</param>
     internal void SetRotation(Quaternion rotation) 
     {
         if (rotation == transform.rotation) { return; }
         transform.rotation = Quaternion.RotateTowards(transform.rotation, rotation, _turningSpeed * Time.deltaTime); 
+    }
+
+    internal bool IsGrounded()
+    {
+        return Physics.CheckBox(transform.position, _collider.bounds.extents, transform.rotation/*, LayerMask.GetMask("Ground")*/);
     }
 }
