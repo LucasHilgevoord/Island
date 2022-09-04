@@ -13,24 +13,29 @@ public class Actor : MonoBehaviour
 
     [Header("Actor Variables :")]
     [SerializeField] private float _walkingSpeed = 1;
-    [SerializeField] private float _runningSpeed = 1;
-    [SerializeField] private float _crouchingSpeed = 1;
+    [SerializeField] private float _runningSpeed = 2;
+    [SerializeField] private float _crouchingSpeed = 0.5f;
     [SerializeField] private float _turningSpeed = 1;
 
-    /// How higher the number, how longer it takes
+    [SerializeField, Tooltip("How much Kinetic Energy")] private float _jumpCharge = 0.1f;
+    [SerializeField] private float _jumpForce = 1;
+
+    /// The higher the number, the longer it takes
     [SerializeField] private float _accelerationTime = 1;
     [SerializeField] private float _decelerationTime = 1;
     [SerializeField] private float _breakTime = 1;
+
 
     #region Getters
     internal float WalkingSpeed => _walkingSpeed;
     internal float RunningSpeed => _runningSpeed;
     internal float CrouchingSpeed => _crouchingSpeed;
     internal float TurningSpeed => _turningSpeed;
+    internal float JumpForce => _jumpForce;
     internal float AccelerationTime => _accelerationTime;
     internal float DecelerationTime => _decelerationTime;
     internal float BreakTime => _breakTime;
-
+    internal Vector3 CurrentVelocity => _rigidbody.velocity;
     #endregion
 
     //[Header("Movement Options :")]
@@ -66,6 +71,8 @@ public class Actor : MonoBehaviour
 
     internal bool IsGrounded()
     {
-        return Physics.CheckBox(transform.position, _collider.bounds.extents, transform.rotation/*, LayerMask.GetMask("Ground")*/);
+        RaycastHit hit;
+        Debug.DrawRay(transform.position, Vector3.down * 0.01f, Color.red);
+        return Physics.Raycast(transform.position, Vector3.down, out hit, 0.01f);
     }
 }

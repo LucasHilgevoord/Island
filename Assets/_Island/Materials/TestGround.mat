@@ -100,7 +100,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - Vector1_652b72b7615a46109d888b84ad828d18: 0.5
+    - Vector1_652b72b7615a46109d888b84ad828d18: 0
     - _AlphaClip: 0
     - _Amount: 0.001
     - _Blend: 0
@@ -117,7 +117,7 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _Metallic: 0
+    - _Metallic: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueControl: 0
@@ -131,7 +131,8 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - Color_b218eaa9bc7d451587d73d26aa430d77: {r: 1, g: 1, b: 1, a: 1}
+    - Color_b218eaa9bc7d451587d73d26aa430d77: {r: 0.6415094, g: 0.6415094, b: 0.6415094,
+        a: 1}
     - Vector2_9442c7528105442ca0413fe1abd96565: {r: 0.5, g: 0.5, b: 0, a: 0}
     - Vector2_ee1355e688d64718af5710aceb07bb0e: {r: 1, g: 1, b: 0, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}

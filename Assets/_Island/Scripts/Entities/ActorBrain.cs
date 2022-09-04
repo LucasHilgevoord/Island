@@ -3,14 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ControllerState
+public enum GroundState
 {
     Grounded,
     Falling,
     Raising
 }
 
-public enum MovementState
+public enum ControllerState
 {
     Idle,
     Walking,
@@ -34,8 +34,8 @@ public class ActorBrain : MonoBehaviour
     [SerializeField] private float _groundFriction;
 
     [Header("Controller Variables :")]
+    private GroundState _groundState;
     private ControllerState _controllerState;
-    private MovementState _movementState;
     private Vector3 _newVelocity, _currentVelocity;
     private Vector3 _direction;
     private Quaternion _rotation;
@@ -52,11 +52,17 @@ public class ActorBrain : MonoBehaviour
     [Header("Actor Variables :")]
     [SerializeField] private Actor _actor;
 
+    #region Getters
+    internal Vector3 Direction => _direction;
+    internal Vector3 Momentum => _momentum;
+    internal GroundState GroundState => _groundState;
+    #endregion
+
     private void Start()
     {
         // TESTING
-        _movementState = MovementState.Walking;
-        _controllerState = ControllerState.Grounded;
+        _controllerState = ControllerState.Walking;
+        _groundState = GroundState.Grounded;
     }
 
     private void AssignActor(Actor ac) { _actor = ac; }
@@ -73,14 +79,19 @@ public class ActorBrain : MonoBehaviour
         // JUST FOR TESTING
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            _movementState = MovementState.Sprinting;
+            _controllerState = ControllerState.Sprinting;
         }
         else if (Input.GetKey(KeyCode.LeftControl))
         {
-            _movementState = MovementState.Crouching;
+            _controllerState = ControllerState.Crouching;
         } else
         {
-            _movementState = MovementState.Walking;
+            _controllerState = ControllerState.Walking;
+        }
+
+        if (Input.GetKey(KeyCode.Space))
+        {
+            
         }
     }
 
@@ -88,6 +99,8 @@ public class ActorBrain : MonoBehaviour
     {
         // Only allow movement if we say so
         if (_lockInput || _actor == null) { return; }
+
+        CheckControllerState();
 
         // Save the current velocity before changing it
         _currentVelocity = _newVelocity;
@@ -99,7 +112,7 @@ public class ActorBrain : MonoBehaviour
         _acceleration = CalculateAcceleration(_direction);
 
         // Calculate the new velocity we are supposed to get
-        _newVelocity = CalculateVelocity();
+        _newVelocity = CalculateVelocity(_direction);
 
         // Calculate the rotation we are supposed to get
         _rotation = CalculateRotation(_direction);
@@ -116,16 +129,13 @@ public class ActorBrain : MonoBehaviour
     {
         Vector3 dir = Vector3.zero;
 
-        // Check if we want to move based on the camera it's direction
-        if (_useCameraDirection)
+        // TODO: Create a input system
+        dir += transform.right * Input.GetAxisRaw("Horizontal");
+        dir += transform.forward * Input.GetAxisRaw("Vertical");
+
+        if (Input.GetKey(KeyCode.Space))
         {
-            throw new NotImplementedException();
-        }
-        else
-        {
-            // TODO: Create a input system
-            dir += transform.right * Input.GetAxisRaw("Horizontal");
-            dir += transform.forward * Input.GetAxisRaw("Vertical");
+            dir += transform.up;
         }
 
         // Enable the break if we go to the oppposite direction
@@ -149,10 +159,10 @@ public class ActorBrain : MonoBehaviour
     }
 
 
-    private Vector3 CalculateVelocity()
+    private Vector3 CalculateVelocity(Vector3 dir)
     {
         Vector3 velocity = Vector3.zero;
-
+        
         if (_turnInPlace && _isTurning)
             return velocity;
 
@@ -160,8 +170,11 @@ public class ActorBrain : MonoBehaviour
         velocity += _actor.transform.forward * _acceleration;
 
         // Apply gravity
-        if (_controllerState != ControllerState.Grounded)
+        if (_groundState != GroundState.Grounded)
             velocity -= _actor.transform.up * _gravityForce * Time.deltaTime;
+
+        if (dir.y > 0 && _groundState == GroundState.Grounded)
+            velocity += _actor.transform.up * _actor.JumpForce * Time.deltaTime;
 
         if (velocity.magnitude > 1f)
             velocity.Normalize();
@@ -174,7 +187,17 @@ public class ActorBrain : MonoBehaviour
     {
         dir.y = 0;
         if (dir == Vector3.zero || _isBreaking) return _actor.transform.rotation;
-        Quaternion rot = Quaternion.LookRotation(dir, Vector3.up);
+
+        Quaternion rot = Quaternion.identity;
+
+        // Check if we want to move based on the camera it's direction
+        if (_useCameraDirection)
+        {
+            throw new NotImplementedException();
+        } else
+        {
+            rot = Quaternion.LookRotation(dir, Vector3.up);
+        }
         return rot;
     }
 
@@ -240,17 +263,29 @@ public class ActorBrain : MonoBehaviour
 
     private float GetMaxSpeed()
     {
-        switch (_movementState)
+        switch (_controllerState)
         {
             default:
-            case MovementState.Idle:
+            case ControllerState.Idle:
                 return 0;
-            case MovementState.Walking:
+            case ControllerState.Walking:
                 return _actor.WalkingSpeed;
-            case MovementState.Sprinting:
+            case ControllerState.Sprinting:
                 return _actor.RunningSpeed;
-            case MovementState.Crouching:
+            case ControllerState.Crouching:
                 return _actor.CrouchingSpeed;
+        }
+    }
+
+    private void CheckControllerState()
+    {
+        if (IsGrounded())
+        {
+            _groundState = GroundState.Grounded;
+        }
+        else
+        {
+            _groundState = GroundState.Falling;
         }
     }
 }
