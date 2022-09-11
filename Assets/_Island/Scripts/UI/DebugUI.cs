@@ -12,6 +12,7 @@ public class DebugUI : MonoBehaviour
     [Header("Debug UI elements")]
     [SerializeField] private TextMeshProUGUI _fps;
     [SerializeField] private TextMeshProUGUI _velocity;
+    [SerializeField] private TextMeshProUGUI _acceleration;
     [SerializeField] private TextMeshProUGUI _momentum;
     [SerializeField] private TextMeshProUGUI _inputDir;
     [SerializeField] private TextMeshProUGUI _groundState;
@@ -26,9 +27,10 @@ public class DebugUI : MonoBehaviour
     private void Update()
     {
         _fps.text = "fps: " + (1f / Time.deltaTime).ToString("F0");
-        _velocity.text = "velocity: " + _actor.CurrentVelocity.ToString("F2");
-        _inputDir.text = "input dir: " + _actorBrain.Direction.ToString("F2");
-        _momentum.text = "momentum: " + _actorBrain.Direction.ToString("F2");
+        _velocity.text = "velocity: " + _actorBrain.NewVelocity.ToString("F2");
+        _acceleration.text = "acceleration: " + _actorBrain.Acceleration.ToString("F2");
+        _momentum.text = "momentum: " + _actorBrain.Momentum.ToString("F2");
+        _inputDir.text = "input: " + _actorBrain.Direction.ToString("F0");
         _groundState.text = "ground state: " + _actorBrain.GroundState.ToString();
     }
 

@@ -37,13 +37,14 @@ public class ActorBrain : MonoBehaviour
     private GroundState _groundState;
     private ControllerState _controllerState;
     private Vector3 _newVelocity, _currentVelocity;
-    private Vector3 _direction;
+    private Vector3 _newDirection, _currentDirection;
     private Quaternion _rotation;
     private Vector3 _momentum;
     private float _acceleration;
     
     private bool _isBreaking;
     private bool _isTurning;
+    private bool _isJumping;
 
     [Header("Camera Variables :")]
     [SerializeField] private bool _useCameraDirection;
@@ -53,7 +54,9 @@ public class ActorBrain : MonoBehaviour
     [SerializeField] private Actor _actor;
 
     #region Getters
-    internal Vector3 Direction => _direction;
+    internal Vector3 NewVelocity => _newVelocity;
+    internal Vector3 Direction => _newDirection;
+    internal float Acceleration => _acceleration;
     internal Vector3 Momentum => _momentum;
     internal GroundState GroundState => _groundState;
     #endregion
@@ -70,12 +73,16 @@ public class ActorBrain : MonoBehaviour
     private void FixedUpdate()
     {
         // Update the controller
-        UpdateController();
         CheckInput();
+        UpdateController();
     }
 
     private void CheckInput()
     {
+        Vector3 dir = Vector3.zero;
+        dir += transform.right * Input.GetAxisRaw("Horizontal");
+        dir += transform.forward * Input.GetAxisRaw("Vertical");
+
         // JUST FOR TESTING
         if (Input.GetKey(KeyCode.LeftShift))
         {
@@ -84,14 +91,19 @@ public class ActorBrain : MonoBehaviour
         else if (Input.GetKey(KeyCode.LeftControl))
         {
             _controllerState = ControllerState.Crouching;
-        } else
+        }
+        else if (dir != Vector3.zero)
         {
             _controllerState = ControllerState.Walking;
         }
-
-        if (Input.GetKey(KeyCode.Space))
+        else 
         {
-            
+            _controllerState = ControllerState.Idle;
+        }
+
+        if (Input.GetKey(KeyCode.Space) && !_isJumping && _groundState == GroundState.Grounded)
+        {
+            _isJumping = true;
         }
     }
 
@@ -104,18 +116,19 @@ public class ActorBrain : MonoBehaviour
 
         // Save the current velocity before changing it
         _currentVelocity = _newVelocity;
+        _currentDirection = _newDirection;
 
         // Get the horizontal and vertical velocity
-        _direction = GetDirection();
+        _newDirection = GetDirection();
 
         // Apply acceleration if there is 
-        _acceleration = CalculateAcceleration(_direction);
+        _acceleration = CalculateAcceleration();
 
         // Calculate the new velocity we are supposed to get
-        _newVelocity = CalculateVelocity(_direction);
+        _newVelocity = CalculateVelocity(_newDirection);
 
         // Calculate the rotation we are supposed to get
-        _rotation = CalculateRotation(_direction);
+        _rotation = CalculateRotation(_newDirection);
 
         // Calculate the momentum
         //_momentum = CalculateMomentum();
@@ -134,14 +147,11 @@ public class ActorBrain : MonoBehaviour
         dir += transform.forward * Input.GetAxisRaw("Vertical");
 
         if (Input.GetKey(KeyCode.Space))
-        {
             dir += transform.up;
-        }
 
         // Enable the break if we go to the oppposite direction
         if (!_isBreaking && !_isTurning && _currentVelocity != Vector3.zero && Vector3.Dot(_currentVelocity.normalized, dir) <= -0.99f)
         {
-            //Debug.Log("break: " + Vector3.Dot(_currentVelocity, dir));
             _isBreaking = true;
         }
         else if (_isBreaking && _newVelocity.magnitude <= 0)
@@ -162,24 +172,17 @@ public class ActorBrain : MonoBehaviour
     private Vector3 CalculateVelocity(Vector3 dir)
     {
         Vector3 velocity = Vector3.zero;
-        
         if (_turnInPlace && _isTurning)
             return velocity;
 
-        // Apply forward motion
+        /// Apply horizontal forces
         velocity += _actor.transform.forward * _acceleration;
 
-        // Apply gravity
-        if (_groundState != GroundState.Grounded)
-            velocity -= _actor.transform.up * _gravityForce * Time.deltaTime;
-
-        if (dir.y > 0 && _groundState == GroundState.Grounded)
-            velocity += _actor.transform.up * _actor.JumpForce * Time.deltaTime;
-
-        if (velocity.magnitude > 1f)
-            velocity.Normalize();
         
-        velocity *= GetMaxSpeed();
+        //if (velocity.magnitude > 1f)
+        //    velocity.Normalize();
+
+        //velocity *= GetMaxSpeed();
         return velocity;
     }
 
@@ -201,39 +204,42 @@ public class ActorBrain : MonoBehaviour
         return rot;
     }
 
-    private float CalculateAcceleration(Vector3 dir)
+    private float CalculateAcceleration()
     {
-        dir.y = 0;
-        if (_acceleration == 0 && dir == Vector3.zero) return 0;
-        float maxSpeed = GetMaxSpeed();
-        
+        // Only ways to accelerate is to: Change speed, change direction or both.
+
+        // No need to apply acceleration if there is no change in direction and we are standing still
+        if (_newDirection == Vector3.zero && _acceleration == 0) return 0;
+        float maxSpeed = GetMovementForce();
+
+        // Lower the acceleration first to the max speed
+        if (_acceleration > maxSpeed)
+        {
+            // Decrease the acceleration first before snapping the value to the max
+            _acceleration -= (_acceleration / _actor.DecelerationTime) * Time.deltaTime;
+            return _acceleration;
+        }
+
         if (_isBreaking)
         {
-            // Break 
+            // Make the entity stop
             _acceleration -= (maxSpeed / _actor.BreakTime) * Time.deltaTime;
             _acceleration = Mathf.Max(_acceleration, 0);
-        } else if (dir.magnitude > 0)
-        {
-            // Increase acceleration
-            if (_acceleration > maxSpeed)
-            {
-                // Decrease the acceleration first before snapping the value to the max
-                _acceleration -= (maxSpeed / _actor.DecelerationTime) * Time.deltaTime;
-            } else
-            {
-                // Hold the acceleration at the max speed
-                _acceleration += (maxSpeed / _actor.AccelerationTime) * Time.deltaTime;
-                _acceleration = Mathf.Min(_acceleration, maxSpeed);
-            }
         }
-        else if (dir.magnitude == 0)
+        else if (_newDirection != Vector3.zero && _acceleration != maxSpeed)
+        {
+            // increase the acceleration and hold it at the max speed
+            _acceleration += (maxSpeed / _actor.AccelerationTime) * Time.deltaTime;
+            _acceleration = Mathf.Min(_acceleration, maxSpeed);
+        }
+        else if (_newDirection == Vector3.zero)
         {
             // Decrease over time
-            _acceleration -= (maxSpeed / _actor.DecelerationTime) * Time.deltaTime;
+            _acceleration -= (maxSpeed / _actor.DecelerationTime);// * Time.deltaTime;
             _acceleration = Mathf.Max(_acceleration, 0);
         }
-        
 
+        // SHOULD BE DETERMINED BY (a = F / m)
         return _acceleration;
     }
 
@@ -259,9 +265,14 @@ public class ActorBrain : MonoBehaviour
         return drag;
     }
 
+    private void CalculateNormalForces()
+    {
+
+    }
+
     private bool IsGrounded() => _actor.IsGrounded();
 
-    private float GetMaxSpeed()
+    private float GetMovementForce()
     {
         switch (_controllerState)
         {
@@ -269,11 +280,11 @@ public class ActorBrain : MonoBehaviour
             case ControllerState.Idle:
                 return 0;
             case ControllerState.Walking:
-                return _actor.WalkingSpeed;
+                return _actor.WalkingForce;
             case ControllerState.Sprinting:
-                return _actor.RunningSpeed;
+                return _actor.RunningForce;
             case ControllerState.Crouching:
-                return _actor.CrouchingSpeed;
+                return _actor.CrouchingForce;
         }
     }
 

@@ -12,9 +12,9 @@ public class Actor : MonoBehaviour
     [SerializeField] private Collider _collider;
 
     [Header("Actor Variables :")]
-    [SerializeField] private float _walkingSpeed = 1;
-    [SerializeField] private float _runningSpeed = 2;
-    [SerializeField] private float _crouchingSpeed = 0.5f;
+    [SerializeField] private float _walkingForce = 1;
+    [SerializeField] private float _runningForce = 2;
+    [SerializeField] private float _crouchingForce = 0.5f;
     [SerializeField] private float _turningSpeed = 1;
 
     [SerializeField, Tooltip("How much Kinetic Energy")] private float _jumpCharge = 0.1f;
@@ -27,9 +27,9 @@ public class Actor : MonoBehaviour
 
 
     #region Getters
-    internal float WalkingSpeed => _walkingSpeed;
-    internal float RunningSpeed => _runningSpeed;
-    internal float CrouchingSpeed => _crouchingSpeed;
+    internal float WalkingForce => _walkingForce;
+    internal float RunningForce => _runningForce;
+    internal float CrouchingForce => _crouchingForce;
     internal float TurningSpeed => _turningSpeed;
     internal float JumpForce => _jumpForce;
     internal float AccelerationTime => _accelerationTime;
@@ -55,7 +55,6 @@ public class Actor : MonoBehaviour
     /// <param name="velocity">New Velocity</param>
     internal void SetVelocity(Vector3 velocity)
     {
-        if (velocity == _rigidbody.velocity) { return; }
         _rigidbody.velocity = velocity; 
     }
 
