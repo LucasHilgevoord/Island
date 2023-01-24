@@ -1,6 +1,7 @@
 using Project.Utils;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Build;
 using UnityEngine;
 
 public class CameraHandler : MonoBehaviour
@@ -33,9 +34,21 @@ public class CameraHandler : MonoBehaviour
     [SerializeField] private bool _enableScrollZoom = true;
     [SerializeField] private float _mouseScrollSensitivity = 0.1f;
     [SerializeField] private float _minScroll, _maxScroll;
-    [SerializeField] private bool _flipMouseInput;
+    [SerializeField] private bool _flipVerticalMouseInput;
 
     [SerializeField] private CameraPresets _preset;
+
+    [Header("Camera Collision")]
+    [SerializeField] private bool _enableCollision;
+    [SerializeField] private Vector2 _collisionRange;
+    [SerializeField] private float _collisionSmooth;
+    private Vector3 _normalizedPos;
+
+    public bool MouseRotEnabled { 
+        get { return _enableMouseRot; }
+        set { _enableMouseRot = value; }
+    }
+    
     private Vector2[] _presetValues
     {
         get
@@ -51,6 +64,11 @@ public class CameraHandler : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        _normalizedPos = transform.localPosition.normalized;
+    }
+
     private void Start()
     {
         SetPreset();
@@ -60,6 +78,9 @@ public class CameraHandler : MonoBehaviour
     {
         UpdateOffset();
         UpdateRotation();
+        
+        if (_enableCollision)
+            UpdateCollision();
 
         if (_enableMouseRot)
         {
@@ -95,9 +116,9 @@ public class CameraHandler : MonoBehaviour
 
     private void UpdateMousePosition()
     {
-        int flip = _flipMouseInput ? -1 : 1;
+        int flip = _flipVerticalMouseInput ? -1 : 1;
 
-        _horizontalRot += Input.GetAxis("Mouse X") * Time.deltaTime * _mouseSensitivity * flip;
+        _horizontalRot += Input.GetAxis("Mouse X") * Time.deltaTime * _mouseSensitivity;
         _verticalRot += Input.GetAxis("Mouse Y") * Time.deltaTime * _mouseSensitivity * flip;
     }
 
@@ -137,6 +158,25 @@ public class CameraHandler : MonoBehaviour
         
         _target = target;
     }
+
+    private void UpdateCollision()
+    {
+        //Vector3 desiredCameraPos = transform.TransformPoint(_normalizedPos * _collisionRange.y);
+        //float distance;
+        //RaycastHit hit;
+        
+        //if (Physics.Linecast (transform.position, desiredCameraPos, out hit))
+        //{
+        //    distance = Mathf.Clamp(hit.distance * 0.8f, _collisionRange.x, _collisionRange.y);
+        //} else
+        //{
+        //    distance = _collisionRange.y;
+        //}
+
+        //transform.localPosition = Vector3.Lerp(transform.localPosition, _normalizedPos * distance, Time.deltaTime * _collisionSmooth);
+    }
+
+    #region Editor
 
     private void OnValidate()
     {
@@ -180,4 +220,5 @@ public class CameraHandler : MonoBehaviour
         if (_hideCursor)
             Cursor.visible = !focus;
     }
+    #endregion
 }

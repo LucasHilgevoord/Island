@@ -48,7 +48,7 @@ public class ActorBrain : MonoBehaviour
 
     [Header("Camera Variables :")]
     [SerializeField] private bool _useCameraDirection;
-    [SerializeField] private Camera _camera;
+    [SerializeField] private CameraHandler _cameraHandler;
 
     [Header("Actor Variables :")]
     [SerializeField] private Actor _actor;
@@ -66,6 +66,9 @@ public class ActorBrain : MonoBehaviour
         // TESTING
         _controllerState = ControllerState.Walking;
         _groundState = GroundState.Grounded;
+
+        if (_useCameraDirection)
+            _cameraHandler.MouseRotEnabled = true;
     }
 
     private void AssignActor(Actor ac) { _actor = ac; }
@@ -178,6 +181,42 @@ public class ActorBrain : MonoBehaviour
         /// Apply horizontal forces
         velocity += _actor.transform.forward * _acceleration;
 
+
+        // Apply vertical forces
+        if (_isJumping)
+        {
+            velocity += _actor.transform.up * _actor.JumpForce;
+            if (velocity.y >= _actor.JumpForce)
+                _isJumping = false;
+        }
+        
+        if (_groundState == GroundState.Falling && !_isJumping)
+        {
+            velocity -= _actor.transform.up * _gravityForce;
+        }
+
+        //if (_groundState == GroundState.Grounded)
+        //{
+        //    if (Input.GetKey(KeyCode.Space))
+        //    {
+        //        velocity += _actor.transform.up * _actor.JumpForce;
+        //        //_groundState = GroundState.Raising;
+        //    }
+        //}
+        //else if (_groundState == GroundState.Falling)
+        //{
+        //    velocity -= _actor.transform.up * _gravityForce;
+        //}
+
+        // Apply friction
+        if (_groundState == GroundState.Grounded)
+        {
+            velocity += _currentVelocity * -_groundFriction;
+        }
+        else
+        {
+            velocity += _currentVelocity * -_airResistance;
+        }
         
         //if (velocity.magnitude > 1f)
         //    velocity.Normalize();
@@ -196,7 +235,11 @@ public class ActorBrain : MonoBehaviour
         // Check if we want to move based on the camera it's direction
         if (_useCameraDirection)
         {
-            throw new NotImplementedException();
+            Vector3 fwd = _cameraHandler.transform.forward;
+            rot = Quaternion.LookRotation(fwd, Vector3.up);
+            rot.x = 0;
+            rot.z = 0;
+            //throw new NotImplementedException();
         } else
         {
             rot = Quaternion.LookRotation(dir, Vector3.up);

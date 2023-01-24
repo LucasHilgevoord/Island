@@ -1017,14 +1017,17 @@ MonoBehaviour:
   _targetOffset: {x: 0, y: 1, z: 0}
   _enableMouseRot: 0
   _holdMouseToRotate: 0
-  _hideCursor: 0
-  _mouseSensitivity: 200
-  _enableScrollZoom: 1
+  _hideCursor: 1
+  _mouseSensitivity: 50
+  _enableScrollZoom: 0
   _mouseScrollSensitivity: 0.5
   _minScroll: 5
   _maxScroll: 15
-  _flipMouseInput: 0
+  _flipVerticalMouseInput: 1
   _preset: 2
+  _enableCollision: 0
+  _collisionRange: {x: 1, y: 4}
+  _collisionSmooth: 10
 --- !u!1 &348011007
 GameObject:
   m_ObjectHideFlags: 0
@@ -4078,8 +4081,8 @@ MonoBehaviour:
   _gravityForce: 0.3
   _airResistance: 0
   _groundFriction: 0
-  _useCameraDirection: 0
-  _camera: {fileID: 330585545}
+  _useCameraDirection: 1
+  _cameraHandler: {fileID: 330585548}
   _actor: {fileID: 414155298}
 --- !u!1 &1833878212
 GameObject:
