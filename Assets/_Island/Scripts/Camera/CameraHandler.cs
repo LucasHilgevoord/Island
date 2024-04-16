@@ -198,9 +198,9 @@ public class CameraHandler : MonoBehaviour
 
     private float CapRotation(float rot)
     {
-        if (rot > 360)
+        if (rot >= 360)
             rot = rot - 360;
-        else if (rot < 0)
+        else if (rot <= 0)
         {
             rot = rot + 360;
         }

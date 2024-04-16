@@ -27,7 +27,8 @@ public class ActorBrain : MonoBehaviour
     [Header("Global Options :")]
     [SerializeField] private bool _lockInput;
     [SerializeField] private bool _turnInPlace; // NOT CORRECTLY IMPLEMENTED YET!
-    
+    [SerializeField] private bool _allowJumping = true;
+
     [Header("External Forces: ")]
     [SerializeField] private float _gravityForce;
     [SerializeField] private float _airResistance;
@@ -41,7 +42,8 @@ public class ActorBrain : MonoBehaviour
     private Quaternion _rotation;
     private Vector3 _momentum;
     private float _acceleration;
-    
+    private float _desiredSpeed;
+
     private bool _isBreaking;
     private bool _isTurning;
     private bool _isJumping;
@@ -67,8 +69,8 @@ public class ActorBrain : MonoBehaviour
         _controllerState = ControllerState.Walking;
         _groundState = GroundState.Grounded;
 
-        if (_useCameraDirection)
-            _cameraHandler.MouseRotEnabled = true;
+        //if (_useCameraDirection)
+        //    _cameraHandler.MouseRotEnabled = true;
     }
 
     private void AssignActor(Actor ac) { _actor = ac; }
@@ -89,22 +91,27 @@ public class ActorBrain : MonoBehaviour
         // JUST FOR TESTING
         if (Input.GetKey(KeyCode.LeftShift))
         {
+            _desiredSpeed = _actor.RunningForce;
             _controllerState = ControllerState.Sprinting;
         }
         else if (Input.GetKey(KeyCode.LeftControl))
         {
+            _desiredSpeed = _actor.CrouchingForce;
             _controllerState = ControllerState.Crouching;
         }
         else if (dir != Vector3.zero)
         {
+            _desiredSpeed = _actor.WalkingForce;
             _controllerState = ControllerState.Walking;
         }
         else 
         {
+            _desiredSpeed = 0;
             _controllerState = ControllerState.Idle;
         }
 
-        if (Input.GetKey(KeyCode.Space) && !_isJumping && _groundState == GroundState.Grounded)
+        // TODO: Not yet working
+        if (_allowJumping && Input.GetKey(KeyCode.Space) && !_isJumping && _groundState == GroundState.Grounded)
         {
             _isJumping = true;
         }
@@ -130,6 +137,9 @@ public class ActorBrain : MonoBehaviour
         // Calculate the new velocity we are supposed to get
         _newVelocity = CalculateVelocity(_newDirection);
 
+        // Lerp to the desired velocity, should be based on friction
+        //_newVelocity = _newVelocity.normalized * Mathf.Lerp(_currentVelocity.magnitude, _desiredSpeed, Time.deltaTime);
+
         // Calculate the rotation we are supposed to get
         _rotation = CalculateRotation(_newDirection);
 
@@ -143,34 +153,68 @@ public class ActorBrain : MonoBehaviour
 
     private Vector3 GetDirection()
     {
-        Vector3 dir = Vector3.zero;
+        // Get input for movement
+        Vector3 inputDirection = GetInputDirection();
 
-        // TODO: Create a input system
-        dir += transform.right * Input.GetAxisRaw("Horizontal");
-        dir += transform.forward * Input.GetAxisRaw("Vertical");
+        // Enable or disable breaking based on input
+        UpdateBreakingStatus(inputDirection);
 
-        if (Input.GetKey(KeyCode.Space))
-            dir += transform.up;
+        // Check if we have finished turning
+        CheckTurningStatus(inputDirection);
 
-        // Enable the break if we go to the oppposite direction
-        if (!_isBreaking && !_isTurning && _currentVelocity != Vector3.zero && Vector3.Dot(_currentVelocity.normalized, dir) <= -0.99f)
+        return inputDirection;
+    }
+
+    private Vector3 GetInputDirection()
+    {
+        Vector3 inputDirection = Vector3.zero;
+
+        // Read input for horizontal and vertical movement
+        inputDirection += transform.right * Input.GetAxisRaw("Horizontal");
+        inputDirection += transform.forward * Input.GetAxisRaw("Vertical");
+
+        // Add vertical input for jumping if allowed
+        if (_allowJumping && Input.GetKey(KeyCode.Space))
+        {
+            inputDirection += transform.up;
+        }
+
+        return inputDirection;
+    }
+
+    private void UpdateBreakingStatus(Vector3 inputDirection)
+    {
+        // Enable or disable breaking based on input
+        if (!_isBreaking && !_isTurning && _currentVelocity != Vector3.zero && Vector3.Dot(_currentVelocity.normalized, inputDirection) <= -0.99f)
         {
             _isBreaking = true;
         }
         else if (_isBreaking && _newVelocity.magnitude <= 0)
         {
-            // Disable the break if we have come to a normalizedstop
+            // Disable breaking if we have come to a stop
             _isBreaking = false;
             _isTurning = true;
+            Debug.Log("Finished breaking");
         }
-
-        // Make sure we don't enable the breaking again if we are turning
-        if (_isTurning && (Vector3.Dot(_currentVelocity.normalized, dir) >= 0.99f))
-            _isTurning = false;
-
-        return dir;
     }
 
+    private void CheckTurningStatus(Vector3 inputDirection)
+    {
+        if (_isTurning)
+        {
+            if (_turnInPlace)
+            {
+                // Check if we are rotated to the direction we want to go
+                float angleToTarget = Quaternion.Angle(_actor.transform.rotation, Quaternion.LookRotation(inputDirection));
+                if (angleToTarget < 5.0f)
+                    _isTurning = false;
+            }
+            else if (Vector3.Dot(_currentVelocity.normalized, inputDirection) >= 0.99f)
+            {
+                _isTurning = false;
+            }
+        }
+    }
 
     private Vector3 CalculateVelocity(Vector3 dir)
     {
