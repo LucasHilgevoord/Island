@@ -180,7 +180,7 @@ public class CameraHandler : MonoBehaviour
 
     private void OnValidate()
     {
-        if (Application.isEditor)
+        if (Application.isEditor && _target != null && enabled)
         {
             SetPreset();
             UpdateOffset();
@@ -217,7 +217,7 @@ public class CameraHandler : MonoBehaviour
 
     private void OnApplicationFocus(bool focus)
     {
-        if (_hideCursor)
+        if (_hideCursor && enabled)
             Cursor.visible = !focus;
     }
     #endregion

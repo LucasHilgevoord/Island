@@ -26,12 +26,15 @@ public class DebugUI : MonoBehaviour
 
     private void Update()
     {
-        _fps.text = "fps: " + (1f / Time.deltaTime).ToString("F0");
-        _velocity.text = "velocity: " + _actorBrain.NewVelocity.ToString("F2");
-        _acceleration.text = "acceleration: " + _actorBrain.Acceleration.ToString("F2");
-        _momentum.text = "momentum: " + _actorBrain.Momentum.ToString("F2");
-        _inputDir.text = "input: " + _actorBrain.Direction.ToString("F0");
-        _groundState.text = "ground state: " + _actorBrain.GroundState.ToString();
+        if (_actor != null && _actorBrain != null)
+        {
+            _fps.text = "fps: " + (1f / Time.deltaTime).ToString("F0");
+            _velocity.text = "velocity: " + _actorBrain.NewVelocity.ToString("F2");
+            _acceleration.text = "acceleration: " + _actorBrain.Acceleration.ToString("F2");
+            _momentum.text = "momentum: " + _actorBrain.Momentum.ToString("F2");
+            _inputDir.text = "input: " + _actorBrain.Direction.ToString("F0");
+            _groundState.text = "ground state: " + _actorBrain.GroundState.ToString();
+        }
     }
 
 }

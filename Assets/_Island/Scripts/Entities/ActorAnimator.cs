@@ -11,6 +11,9 @@ public class ActorAnimator : MonoBehaviour
 
     private void Update()
     {
+        if (_animator == null || _actor == null)
+            return;
+
         Vector3 currentVelocity = _actor.CurrentVelocity;
 
         // TEMP TRASH
