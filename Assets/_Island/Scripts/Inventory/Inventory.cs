@@ -2,17 +2,38 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Inventory : MonoBehaviour
+public class Inventory : Singleton<Inventory>
 {
-    // Start is called before the first frame update
-    void Start()
+    public List<ItemData> items = new List<ItemData>();
+    public int space = 20;
+
+    public delegate void OnItemChanged();
+    public OnItemChanged onItemChangedCallback;
+
+    public bool Add(ItemData item)
     {
-        
+        if (items.Count >= space)
+        {
+            Debug.Log("Not enough room.");
+            return false;
+        }
+        items.Add(item);
+
+        if (onItemChangedCallback != null)
+        {
+            onItemChangedCallback.Invoke();
+        }
+
+        return true;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Remove(ItemData item)
     {
-        
+        items.Remove(item);
+
+        if (onItemChangedCallback != null)
+        {
+            onItemChangedCallback.Invoke();
+        }
     }
 }

@@ -1,51 +1,55 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class Command
+namespace Island.Input
 {
-    internal Command() { }
-    virtual internal void Execute() { }
-} 
+    using Island.Destructibles;
+    using System.Collections;
+    using System.Collections.Generic;
+    using UnityEngine;
 
-public class InputHandler : MonoBehaviour
-{
-    private const bool DEBUG = true;
-
-    // Start is called before the first frame update
-    void Start()
+    public class Command
     {
-        
+        internal Command() { }
+        virtual internal void Execute() { }
     }
 
-    // Update is called once per frame
-    void Update()
+    public class InputHandler : MonoBehaviour
     {
-        if (DEBUG)
+        private const bool DEBUG = true;
+
+        // Start is called before the first frame update
+        void Start()
         {
-            // Check if clicked on object
-            if (Input.GetMouseButtonDown(0))
+
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+            if (DEBUG)
             {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit))
+                // Check if clicked on object
+                if (Input.GetMouseButtonDown(0))
                 {
-                    Debug.Log(hit.transform);
-                    if (hit.collider != null)
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit hit;
+                    if (Physics.Raycast(ray, out hit))
                     {
-                        // Check if it is a destructable object
-                        IDestructible destructible = hit.collider.GetComponent<IDestructible>();
-                        if (destructible != null)
+                        Debug.Log(hit.transform);
+                        if (hit.collider != null)
                         {
-                            Debug.Log("Hit!");
-                            destructible.TakeDamage(10f);
+                            // Check if it is a destructable object
+                            IDestructible destructible = hit.collider.GetComponent<IDestructible>();
+                            if (destructible != null)
+                            {
+                                destructible.TakeDamage(10f);
+                            }
                         }
                     }
-                }
 
-                // Add a debug ray
-                Debug.DrawRay(ray.origin, ray.direction * 100, Color.red, 1f);
+                    // Add a debug ray
+                    Debug.DrawRay(ray.origin, ray.direction * 100, Color.red, 1f);
+                }
             }
         }
     }
+
 }

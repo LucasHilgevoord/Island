@@ -1,43 +1,55 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class Destructible : MonoBehaviour, IDestructible
+namespace Island.Destructibles
 {
-    public float Health { get { return health; } set { health = value; } }
-    [SerializeField] private float health = 100f;
-    
-    [SerializeField] private float damageCooldownInSec = 0.5f;
-    private float damageCooldown = 0;
+    using DG.Tweening;
+    using Island.Items;
+    using UnityEngine;
 
-    private void Update()
+    public class Destructible : MonoBehaviour, IDestructible
     {
-        if (damageCooldown > 0)
-        {
-            damageCooldown -= Time.deltaTime;
-        }
-    }
+        public string identifier;
 
-    public void TakeDamage(float amount)
-    {
-        // Only take damage if the cooldown has expired
-        if (damageCooldown <= 0)
+        public float Health { get { return health; } set { health = value; } }
+        [SerializeField] private float health = 100f;
+        [SerializeField] private float damageCooldownInSec = 0.2f;
+        private float damageCooldown = 0;
+        
+        [SerializeField] private Dropable[] dropables;
+
+        private void Update()
         {
-            Debug.Log("HIt");
-            health -= amount;
-            if (health <= 0)
+            if (damageCooldown > 0)
             {
-                DestroyObject();
+                damageCooldown -= Time.deltaTime;
             }
-
-            // Reset the cooldown
-            damageCooldown = damageCooldownInSec;
         }
-    }
 
-    public void DestroyObject()
-    {
-        // Perform destruction effects, remove object from the game world, etc.
-        Destroy(gameObject);
+        public void TakeDamage(float amount)
+        {
+            // Only take damage if the cooldown has expired
+            if (damageCooldown <= 0)
+            {
+
+                health -= amount;
+                if (health <= 0)
+                {
+                    DestroyObject();
+                }
+                else
+                {
+                    OnHit();
+                }
+
+                // Reset the cooldown
+                damageCooldown = damageCooldownInSec;
+            }
+        }
+
+        public virtual void OnHit() { }
+
+        public virtual void DestroyObject()
+        {
+            // Perform destruction effects, remove object from the game world, etc.
+            Destroy(gameObject);
+        }
     }
 }

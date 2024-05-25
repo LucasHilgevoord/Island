@@ -2,36 +2,39 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ActorAnimator : MonoBehaviour
+namespace Island.Actor
 {
-    [SerializeField] private Actor _actor;
-    [SerializeField] private Animator _animator;
-
-    private string _currentAnim;
-
-    private void Update()
+    public class ActorAnimator : MonoBehaviour
     {
-        if (_animator == null || _actor == null)
-            return;
+        [SerializeField] private Actor _actor;
+        [SerializeField] private Animator _animator;
 
-        Vector3 currentVelocity = _actor.CurrentVelocity;
+        private string _currentAnim;
 
-        // TEMP TRASH
-        if (currentVelocity == Vector3.zero && _currentAnim != "idle")
+        private void Update()
         {
-            _currentAnim = "idle";
-            _animator.Play(_currentAnim, 0);
-        }
-        
-        if (currentVelocity != Vector3.zero && _currentAnim != "walk")
-        {
-            _currentAnim = "walk";
-            _animator.Play(_currentAnim, 0);
-        }
-    }
+            if (_animator == null || _actor == null)
+                return;
 
-    internal void SetFloatValue(string name, float value)
-    {
-        _animator.SetFloat(name, value);
+            Vector3 currentVelocity = _actor.CurrentVelocity;
+
+            // TEMP TRASH
+            if (currentVelocity == Vector3.zero && _currentAnim != "idle")
+            {
+                _currentAnim = "idle";
+                _animator.Play(_currentAnim, 0);
+            }
+
+            if (currentVelocity != Vector3.zero && _currentAnim != "walk")
+            {
+                _currentAnim = "walk";
+                _animator.Play(_currentAnim, 0);
+            }
+        }
+
+        internal void SetFloatValue(string name, float value)
+        {
+            _animator.SetFloat(name, value);
+        }
     }
 }

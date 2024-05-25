@@ -2,8 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IDestructible
+namespace Island.Destructibles
 {
-    void TakeDamage(float amount);
-    void DestroyObject();
+    public interface IDestructible
+    {
+        float Health { get; set; }
+        void TakeDamage(float amount);
+        void DestroyObject();
+    }
 }
